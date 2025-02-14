@@ -1,5 +1,6 @@
 import numpy as np
-
+from os import environ
+environ['PYGAME_HIDE_SUPPORT_PROMPT'] = '1'
 import sys
 
 import pygame
@@ -7,7 +8,7 @@ import pygame
 from board import Space
 from game import Game
 from random_bot import RandomPlayer
-
+from pickaxe_bot import Pickaxer
 
 def update():
     for event in pygame.event.get():
@@ -70,7 +71,7 @@ def runPyGame(game: Game):
 
 
 def main():
-    player_a, player_b = RandomPlayer(), RandomPlayer()
+    player_a, player_b = Pickaxer(), RandomPlayer()
     game = Game(player_a, player_b, time_per_move=3, add_sleep=True, small=True, min_sleep_time=2)
     runPyGame(game)
 
