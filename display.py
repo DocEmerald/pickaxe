@@ -1,6 +1,5 @@
 import numpy as np
-from os import environ
-environ['PYGAME_HIDE_SUPPORT_PROMPT'] = '1'
+
 import sys
 
 import pygame
@@ -72,7 +71,7 @@ def runPyGame(game: Game):
 
 def main():
     player_a, player_b = Pickaxer(), RandomPlayer()
-    game = Game(player_a, player_b, time_per_move=3, add_sleep=True, small=True, min_sleep_time=2)
+    game = Game(player_a, player_b, time_per_move=3, small=True, min_sleep_time=2)
     runPyGame(game)
 
 

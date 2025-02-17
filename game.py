@@ -1,4 +1,6 @@
-from copy import deepcopy
+from copy import copy
+from os import environ
+environ['PYGAME_HIDE_SUPPORT_PROMPT'] = '1'
 import time
 import traceback
 from typing import Protocol
@@ -26,24 +28,25 @@ class Game:
         red: Player,
         blue: Player,
         small: bool = False,
-        time_per_move: float = 1.0,
-        add_sleep: bool = False,
-        min_sleep_time: float | None = None,
+        time_per_move: float = 3.0,
+        reserve_time: float = 10.0,
+        min_sleep_time: float = 0.0,
     ):
         self.players = {Space.RED: red, Space.BLUE: blue}  # red, blue
-        self.red_turn = False
+        self.red_turn = True
         self.board = Board(small)
         self.winner: Space | None = None
         self.time_per_move = time_per_move
-        self.wait_full_time = add_sleep
-        self.min_sleep_time = min_sleep_time if min_sleep_time else self.time_per_move
+        self.min_sleep_time = min_sleep_time
+        self.reserve_time = {Space.RED: reserve_time, Space.BLUE: reserve_time}
 
     def step(self):
         if self.winner:
             return
-        available_time = self.time_per_move
         player_color = Space.RED if self.red_turn else Space.BLUE
         other_color = Space.BLUE if self.red_turn else Space.RED
+        total_time = self.time_per_move + self.reserve_time[player_color]
+        available_time = total_time
         player = self.players[player_color]
         # Check if a player just lost by not being able to mine
         if len(self.board.mineable_by_player(player_color)) == 0:
@@ -52,7 +55,7 @@ class Game:
         # Current player needs to dig out a space
         with Pool(processes=1) as pool:
             mine_res = pool.apply_async(
-                player.mine, (deepcopy(self.board), player_color)
+                player.mine, (copy(self.board), player_color)
             )
             try:
                 start_time = time.monotonic()
@@ -82,22 +85,31 @@ class Game:
         )
         # Current player may move
         with Pool(processes=2) as pool:
-            if self.wait_full_time:
+            if self.min_sleep_time > 0:
                 sleep_time = max(
                     0,
                     min(
                         available_time,
-                        self.min_sleep_time - (self.time_per_move - available_time),
+                        self.min_sleep_time
+                        - (
+                            self.time_per_move
+                            + self.reserve_time[player_color]
+                            - available_time
+                        ),
                     ),
                 )
                 delay = pool.apply_async(time.sleep, (sleep_time,))
             move_res = pool.apply_async(
-                player.move, (deepcopy(self.board), player_color)
+                player.move, (copy(self.board), player_color)
             )
             try:
-                if self.wait_full_time:
+                if self.min_sleep_time > 0:
                     delay.get()
+                start_time = time.monotonic()
                 move = move_res.get(available_time)
+                end_time = time.monotonic()
+                available_time -= end_time - start_time
+                self.reserve_time[player_color] -= max(0, total_time - available_time - self.time_per_move)
             # player crashed or timed out
             except TimeoutError:
                 self.winner = other_color
@@ -123,18 +135,9 @@ class Game:
             self.board[move_start] = Space.EMPTY
             self.board[move_end] = player_color
         # Clear dead enemies
-        self.clear_dead(other_color)
+        self.board.clear_dead(other_color)
         # Switch players
         self.red_turn = not self.red_turn
-
-    def clear_dead(self, other_color: Space):
-        dead_enemies = {
-            coord
-            for coord in self.board.cells
-            if self.board[coord] == other_color and self.board.is_miner_dead(coord)
-        }
-        for enemy in dead_enemies:
-            self.board[enemy] = Space.EMPTY
 
     def play_game(self) -> Space:
         while not self.winner:
