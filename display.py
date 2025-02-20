@@ -3,12 +3,15 @@ import numpy as np
 import sys
 
 import pygame
+import pygame.gfxdraw
 
 from board import Space
 from game import Game
 from random_bot import RandomPlayer
 from pickaxe_bot import Pickaxer
-
+bg_image = pygame.image.load('Space.jpg')
+bg_image_red = pygame.image.load('Space_red.jpg')
+bg_image_blue = pygame.image.load('Space_blue.jpg')
 def update():
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
@@ -26,16 +29,20 @@ def hexagon(
         )
         for theta in np.linspace(0, 2 * np.pi, 6, endpoint=False) + np.pi / 6
     ]
-    pygame.draw.polygon(screen, color, corners)
+    pygame.gfxdraw.aapolygon(screen, corners, color)
+    pygame.gfxdraw.filled_polygon(screen, corners, color)
 
 
 def draw(screen: pygame.Surface, game: Game):
     if game.winner == None:
         screen.fill((0, 0, 0))
+        screen.blit(bg_image, (0,0))
     elif game.winner == Space.RED:
         screen.fill((100, 0, 0))
+        screen.blit(bg_image_red, (0,0))
     elif game.winner == Space.BLUE:
         screen.fill((0, 0, 100))
+        screen.blit(bg_image_blue, (0,0))
     cell_size = screen.get_width() / (3.5 * game.board.size)
     for coord in game.board.cells:
         q, r = coord[:2]
@@ -43,20 +50,25 @@ def draw(screen: pygame.Surface, game: Game):
         y = screen.get_height() / 2 + cell_size * 1.5 * r
         contents = game.board.cells[coord]
         if contents == Space.WALL:
-            color = (100, 100, 100)
+            color = (48, 213, 200)
+            
         else:
-            color = (255, 255, 255)
+            color = (225, 255, 254)
         hexagon(screen, x, y, cell_size, color)
         if contents == Space.RED:
-            pygame.draw.circle(screen, (255, 0, 0), (x, y), 0.6 * cell_size)
+            pygame.gfxdraw.aacircle(screen, int(x), int(y), int(0.6 * cell_size), (255, 0, 0))
+            pygame.gfxdraw.filled_circle(screen, int(x), int(y), int(0.6 * cell_size), (255, 0, 0))
         elif contents == Space.BLUE:
-            pygame.draw.circle(screen, (0, 0, 255), (x, y), 0.6 * cell_size)
+            pygame.gfxdraw.aacircle(screen, int(x), int(y), int(0.6 * cell_size), (0, 0, 255))
+            pygame.gfxdraw.filled_circle(screen, int(x), int(y), int(0.6 * cell_size), (0, 0, 255))
 
     pygame.display.flip()
 
 
 def runPyGame(game: Game):
     pygame.init()
+    pygame.mixer.music.load("Iris.mp3")
+    pygame.mixer.music.play(-1)
 
     # Set up the window.
     width, height = 800, 800
@@ -71,7 +83,7 @@ def runPyGame(game: Game):
 
 def main():
     player_a, player_b = Pickaxer(), RandomPlayer()
-    game = Game(player_a, player_b, time_per_move=3, small=True, min_sleep_time=2)
+    game = Game(player_a, player_b, time_per_move=3, small=True, min_sleep_time=0)
     runPyGame(game)
 
 
