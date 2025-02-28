@@ -4,11 +4,13 @@ import sys
 
 import pygame
 import pygame.gfxdraw
-
+from os import environ
+environ['PYGAME_HIDE_SUPPORT_PROMPT'] = '1'
 from board import Space
 from game import Game
 from random_bot import RandomPlayer
 from pickaxe_bot import Pickaxer
+from pacifist_pickaxe_bot import Pacifist_Pickaxer
 bg_image = pygame.image.load('Space.jpg')
 bg_image_red = pygame.image.load('Space_red.jpg')
 bg_image_blue = pygame.image.load('Space_blue.jpg')
@@ -68,7 +70,7 @@ def draw(screen: pygame.Surface, game: Game):
 def runPyGame(game: Game):
     pygame.init()
     pygame.mixer.music.load("Iris.mp3")
-    pygame.mixer.music.play(-1)
+    ##pygame.mixer.music.play(-1)
 
     # Set up the window.
     width, height = 800, 800
@@ -82,7 +84,7 @@ def runPyGame(game: Game):
 
 
 def main():
-    player_a, player_b = Pickaxer(), RandomPlayer()
+    player_a, player_b = Pickaxer(), Pacifist_Pickaxer()
     game = Game(player_a, player_b, time_per_move=3, small=True, min_sleep_time=0)
     runPyGame(game)
 

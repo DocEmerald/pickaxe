@@ -29,7 +29,7 @@ class Pickaxer:
     def clairvoyance(self, board: Board, color: Space, depth: int, alpha: float, beta: float, maximizing: bool):
         board_hash = hash(board)
         if board_hash in self.transpos_table:
-            #print('found')
+            print('found')
             return self.transpos_table[board_hash]
         if depth == 0 or board.mineable_by_player(color) == 0:
             eval_score = self.evaluate(board,color)
@@ -52,7 +52,7 @@ class Pickaxer:
                 if beta <= alpha:
                     break
             self.transpos_table[board_hash] = (max_eval, best_move)
-            #print("discovered")
+            print("discovered")
             return max_eval, best_move
         else:
             min_eval = float('inf')
@@ -71,7 +71,7 @@ class Pickaxer:
                 if beta <= alpha:
                     break
             self.transpos_table[board_hash] = (min_eval,best_move)
-            #print("discovered")
+            print("discovered")
             return min_eval, best_move
     def mine(self, board: Board, color: Space) -> Coordinate:
         eval_score, best_move = self.clairvoyance(board, color, self.depth, float('-inf'), float('inf'), True)
@@ -99,11 +99,6 @@ class Pickaxer:
         else:
             return None
     def save_table(self):
-        with open(self.TRANSPOSITION_FILE, "wb") as f:
-            pickle.dump(self.transpos_table, f)
+        print('hello')
     def load_table(self):
-        try:
-            with open(self.TRANSPOSITION_FILE, "rb") as f:
-                return pickle.load(f)
-        except (FileNotFoundError, EOFError):
-            return {}
+        return {}
