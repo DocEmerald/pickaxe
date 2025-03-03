@@ -23,13 +23,9 @@ class Pickaxer:
         my_pieces = projected_board.count_elements(color)
         opponent_pieces = projected_board.count_elements(opponent)
         return (len(projected_board.mineable_by_player(color)) + my_pieces) - (len(projected_board.mineable_by_player(opponent)) + opponent_pieces)
-    def parallel_clairvoyance(self, clairvoy):
-        board, color, depth, alpha, beta, maximizing = clairvoy
-        return self.clairvoyance(board,color,depth,alpha,beta, maximizing)
     def clairvoyance(self, board: Board, color: Space, depth: int, alpha: float, beta: float, maximizing: bool):
         board_hash = hash(board)
         if board_hash in self.transpos_table:
-            #print('found')
             return self.transpos_table[board_hash]
         if depth == 0 or board.mineable_by_player(color) == 0:
             eval_score = self.evaluate(board,color)
@@ -52,7 +48,6 @@ class Pickaxer:
                 if beta <= alpha:
                     break
             self.transpos_table[board_hash] = (max_eval, best_move)
-            #print("discovered")
             return max_eval, best_move
         else:
             min_eval = float('inf')
