@@ -9,7 +9,7 @@ environ['PYGAME_HIDE_SUPPORT_PROMPT'] = '1'
 from board import Space
 from game import Game
 from random_bot import RandomPlayer
-from pickaxe_bot import Pickaxer
+from Munin import Munin
 from pacifist_pickaxe_bot import Pacifist_Pickaxer
 bg_image = pygame.image.load('Space.jpg')
 bg_image_red = pygame.image.load('Space_red.jpg')
@@ -84,7 +84,7 @@ def runPyGame(game: Game):
 
 
 def main():
-    player_a, player_b = Pickaxer(), RandomPlayer()
+    player_a, player_b = Munin(), RandomPlayer()
     game = Game(player_a, player_b, time_per_move=3, small=True, min_sleep_time=0)
     runPyGame(game)
 

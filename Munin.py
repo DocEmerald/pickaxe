@@ -2,12 +2,12 @@ from random import choice
 from board import Board, Space, Coordinate
 import pickle
 
-class Pickaxer:
+class Munin:
     count = 0
     TRANSPOSITION_FILE = "the_time_stone.pkl"
     def __init__(self):
-        self.name = f"Pickaxer_{Pickaxer.count}"
-        Pickaxer.count += 1
+        self.name = f"MUNIN_{Munin.count}"
+        Munin.count += 1
         self.depth = 3
         self.transpos_table = self.load_table()
     def get_opponent(self, color):
